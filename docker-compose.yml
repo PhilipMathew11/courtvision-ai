@@ -1,0 +1,118 @@
+version: "3.9"
+
+services:
+  # ── PostgreSQL ──
+  postgres:
+    image: postgres:16-alpine
+    container_name: courtvision_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-courtvision}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-courtvision_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-courtvision}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Redis ──
+  redis:
+    image: redis:7-alpine
+    container_name: courtvision_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── ChromaDB ──
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: courtvision_chroma
+    restart: unless-stopped
+    ports:
+      - "8001:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+    environment:
+      ANONYMIZED_TELEMETRY: "false"
+
+  # ── Backend ──
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: courtvision_backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://courtvision:password@postgres:5432/courtvision_db
+      REDIS_URL: redis://redis:6379
+      CHROMA_HOST: chromadb
+      CHROMA_PORT: 8000
+     
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+  # ── Frontend ──
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: courtvision_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      NEXT_PUBLIC_API_URL: http://backend:8000/api/v1
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+
+  # ── Pipeline (run manually) ──
+  pipeline:
+    build:
+      context: ./pipeline
+      dockerfile: Dockerfile
+    container_name: courtvision_pipeline
+    profiles: ["pipeline"]
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://courtvision:password@postgres:5432/courtvision_db
+      CHROMA_HOST: chromadb
+      CHROMA_PORT: 8000
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./pipeline:/app
+      - ./ml:/ml
+
+volumes:
+  postgres_data:
+  redis_data:
+  chroma_data:

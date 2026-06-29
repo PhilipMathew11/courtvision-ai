@@ -1,0 +1,31 @@
+# ── App ──
+APP_ENV=development
+SECRET_KEY=your-secret-key-here
+DEBUG=true
+
+# ── Database ──
+DATABASE_URL=postgresql://courtvision:password@localhost:5432/courtvision_db
+POSTGRES_USER=courtvision
+POSTGRES_PASSWORD=password
+POSTGRES_DB=courtvision_db
+
+# ── Redis ──
+REDIS_URL=redis://localhost:6379
+
+# ── ChromaDB ──
+CHROMA_HOST=localhost
+CHROMA_PORT=8001
+CHROMA_COLLECTION_PLAYERS=player_embeddings
+CHROMA_COLLECTION_GAMES=game_embeddings
+
+# ── AI / LLM ──
+OPENAI_API_KEY=your-openai-key-here
+OPENAI_MODEL=gpt-4o-mini
+EMBEDDING_MODEL=all-MiniLM-L6-v2
+
+# ── NBA API ──
+NBA_API_DELAY=0.6
+
+# ── Frontend ──
+NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+NEXT_PUBLIC_APP_NAME=CourtVision AI
