@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, Float, Boolean, Date, Text
+from sqlalchemy import Column, Integer, String, Boolean, Date, Text
+from sqlalchemy.dialects.postgresql import JSONB
 from app.db.base import Base, TimestampMixin
 
 
@@ -25,3 +26,5 @@ class Player(Base, TimestampMixin):
     from_year = Column(Integer)
     to_year = Column(Integer)
     headshot_url = Column(Text)
+    dna_scores = Column(JSONB)
+    season_stats = Column(JSONB)

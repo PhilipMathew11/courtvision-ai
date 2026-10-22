@@ -49,6 +49,7 @@ services:
 
   # ── Backend ──
   backend:
+    image: courtvision-ai-backend
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -63,7 +64,7 @@ services:
       REDIS_URL: redis://redis:6379
       CHROMA_HOST: chromadb
       CHROMA_PORT: 8000
-     
+
     depends_on:
       postgres:
         condition: service_healthy
@@ -84,13 +85,35 @@ services:
     env_file:
       - .env
     environment:
-      NEXT_PUBLIC_API_URL: http://backend:8000/api/v1
+      NEXT_PUBLIC_API_URL: http://localhost:8000/api/v1
     depends_on:
       - backend
     volumes:
       - ./frontend:/app
       - /app/node_modules
       - /app/.next
+
+  # ── Daily NBA data sync ──
+  data-sync:
+    image: courtvision-ai-data-sync
+    build:
+      context: ./pipeline
+      dockerfile: Sync.Dockerfile
+    container_name: courtvision_data_sync
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-courtvision}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-courtvision_db}
+      NBA_SYNC_HOUR_UTC: ${NBA_SYNC_HOUR_UTC:-9}
+      NBA_SYNC_RETRY_MINUTES: ${NBA_SYNC_RETRY_MINUTES:-60}
+      NBA_API_DELAY: ${NBA_API_DELAY:-1}
+      NBA_API_TIMEOUT: ${NBA_API_TIMEOUT:-15}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend:/backend:ro
+      - ./pipeline:/pipeline:ro
+    command: sh -c "alembic upgrade head && python /pipeline/scripts/sync_scheduler.py"
 
   # ── Pipeline (run manually) ──
   pipeline:
@@ -111,6 +134,7 @@ services:
     volumes:
       - ./pipeline:/app
       - ./ml:/ml
+    command: ["python", "scripts/sync_daily.py"]
 
 volumes:
   postgres_data:

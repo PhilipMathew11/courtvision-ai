@@ -127,15 +127,26 @@ export default function PlayerDNAPage() {
   const [compare, setCompare] = useState<Player | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingSimilar, setLoadingSimilar] = useState(false);
+  const [searchError, setSearchError] = useState("");
 
   const search = useCallback(async (q: string) => {
-    if (!q.trim()) { setResults([]); return; }
+    if (!q.trim()) {
+      setResults([]);
+      setSearchError("");
+      return;
+    }
     setLoading(true);
+    setSearchError("");
     try {
       const res = await fetch(`${API}/dna/search?q=${encodeURIComponent(q)}`);
+      if (!res.ok) throw new Error(`Player search failed (${res.status})`);
       const data = await res.json();
+      if (!Array.isArray(data)) throw new Error("Unexpected player search response");
       setResults(data);
-    } catch { setResults([]); }
+    } catch {
+      setResults([]);
+      setSearchError("Player search is unavailable right now. Please try again.");
+    }
     finally { setLoading(false); }
   }, []);
 
@@ -189,7 +200,7 @@ export default function PlayerDNAPage() {
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search any NBA player... (e.g. LeBron, Curry, Jokic)"
+          placeholder="Search player DNA profiles... (e.g. Curry, Giannis, Tatum)"
           style={{
             width: "100%", background: "var(--cv-card)",
             border: "1px solid var(--cv-border)", borderRadius: 10,
@@ -202,13 +213,28 @@ export default function PlayerDNAPage() {
         />
 
         {/* Dropdown results */}
-        {results.length > 0 && (
+        {(results.length > 0 || (query.trim() && !loading)) && (
           <div style={{
             position: "absolute", top: "calc(100% + 6px)", left: 0, right: 0, zIndex: 50,
             background: "var(--cv-card)", border: "1px solid var(--cv-border)",
             borderRadius: 10, overflow: "hidden",
             boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
           }}>
+            {loading && (
+              <p role="status" style={{ padding: "12px 14px", fontSize: 13, color: "var(--cv-muted)" }}>
+                Searching player profiles...
+              </p>
+            )}
+            {searchError && (
+              <p role="status" style={{ padding: "12px 14px", fontSize: 13, color: "var(--cv-red)" }}>
+                {searchError}
+              </p>
+            )}
+            {!loading && !searchError && results.length === 0 && (
+              <p role="status" style={{ padding: "12px 14px", fontSize: 13, color: "var(--cv-muted)" }}>
+                No DNA profile found for “{query}”. Try Stephen Curry, Giannis, or Jayson Tatum.
+              </p>
+            )}
             {results.map((p) => (
               <div
                 key={p.nba_id}
@@ -250,7 +276,7 @@ export default function PlayerDNAPage() {
             See their basketball DNA across 11 dimensions and find their most similar players in the league.
           </p>
           <div style={{ display: "flex", gap: 8, marginTop: 16, flexWrap: "wrap", justifyContent: "center" }}>
-            {["LeBron James", "Stephen Curry", "Nikola Jokic", "Jayson Tatum"].map((name) => (
+            {["Stephen Curry", "Giannis Antetokounmpo", "Jayson Tatum"].map((name) => (
               <button
                 key={name}
                 onClick={() => setQuery(name)}

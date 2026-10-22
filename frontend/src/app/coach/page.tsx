@@ -195,7 +195,7 @@ export default function CoachPage() {
             </div>
             <div>
               <h1 className="font-display" style={{ fontSize: 20, fontWeight: 700, color: "var(--cv-text)" }}>Coach AI</h1>
-              <p style={{ fontSize: 12, color: "var(--cv-muted)" }}>Powered by Llama 3.3 · Real stats · Game-level context</p>
+              <p style={{ fontSize: 12, color: "var(--cv-muted)" }}>Powered by Groq · Real stats · Game-level context</p>
             </div>
             <div style={{ marginLeft: "auto", display: "flex", gap: 6 }}>
               <span className="badge badge-ai"><Sparkles style={{ width: 9, height: 9 }} /> AI</span>
@@ -279,7 +279,7 @@ export default function CoachPage() {
         </div>
 
         <p style={{ textAlign: "center", fontSize: 11, color: "var(--cv-subtle)", marginTop: 8 }}>
-          Powered by Llama 3.3 70B via Groq · Grounded in real NBA data
+          Powered by Groq · Grounded in real NBA data
         </p>
       </div>
     </PageWrapper>

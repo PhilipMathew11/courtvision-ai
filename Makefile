@@ -19,7 +19,7 @@ dev:
 	docker compose up -d postgres redis chromadb
 	@echo "⏳ Waiting for databases..."
 	@sleep 3
-	docker compose up -d backend frontend
+	docker compose up -d backend frontend data-sync
 	@echo "✅ Running at http://localhost:3000"
 
 stop:
@@ -37,6 +37,9 @@ logs-backend:
 logs-frontend:
 	docker compose logs -f frontend
 
+logs-data-sync:
+	docker compose logs -f data-sync
+
 shell-backend:
 	docker compose exec backend bash
 
@@ -50,7 +53,7 @@ seed:
 	docker compose exec backend python -m app.db.seed
 
 pipeline:
-	docker compose --profile pipeline run --rm pipeline python scripts/run_pipeline.py
+	docker compose --profile pipeline run --rm pipeline
 
 lint:
 	docker compose exec backend ruff check .

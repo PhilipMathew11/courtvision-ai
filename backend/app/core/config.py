@@ -9,6 +9,14 @@ class Settings(BaseSettings):
     debug: bool = True
     secret_key: str = "change-this-in-production"
     api_v1_prefix: str = "/api/v1"
+    access_token_expire_minutes: int = 10080
+    auth_cookie_name: str = "courtvision_session"
+    auth_cookie_samesite: str = "lax"
+    cors_origins: str = "http://localhost:3000"
+    frontend_url: str = "http://localhost:3000"
+    google_client_id: str = ""
+    google_client_secret: str = ""
+    google_redirect_uri: str = "http://localhost:8000/api/v1/auth/google/callback"
 
     # Database
     database_url: str = "postgresql://courtvision:password@localhost:5432/courtvision_db"
@@ -33,6 +41,10 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = False
+
+    @property
+    def allowed_origins(self) -> list[str]:
+        return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
 
 
 @lru_cache()

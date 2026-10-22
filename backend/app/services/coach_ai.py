@@ -1,6 +1,7 @@
 import os
 from typing import Optional
 from groq import AsyncGroq
+from app.services.llm import groq_messages, groq_token_limit
 
 SYSTEM_PROMPT = """You are Coach AI, an expert NBA basketball analyst powered by CourtVision AI.
 
@@ -22,23 +23,17 @@ Format your response clearly with natural paragraphs. No bullet point lists."""
 
 async def ask_coach(question: str, context: Optional[str] = None) -> dict:
     client = AsyncGroq(api_key=os.getenv("GROQ_API_KEY"))
-
-    messages = [
-        {"role": "system", "content": SYSTEM_PROMPT},
-    ]
+    model = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
 
     if context:
-        messages.append({
-            "role": "user",
-            "content": f"Context:\n{context}\n\nQuestion: {question}"
-        })
+        user_content = f"Context:\n{context}\n\nQuestion: {question}"
     else:
-        messages.append({"role": "user", "content": question})
+        user_content = question
 
     response = await client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        messages=messages,
-        max_tokens=800,
+        model=model,
+        messages=groq_messages(model, SYSTEM_PROMPT, user_content),
+        **groq_token_limit(model, 800),
         temperature=0.7,
     )
 
@@ -57,5 +52,5 @@ async def ask_coach(question: str, context: Optional[str] = None) -> dict:
     return {
         "answer": answer,
         "sources": sources,
-        "model": "llama-3.3-70b-versatile"
+        "model": model,
     }

@@ -1,7 +1,18 @@
 "use client";
-import { Search, Bell, ChevronDown } from "lucide-react";
+import { Search, Bell, LogOut } from "lucide-react";
+import type { AuthUser } from "@/components/auth/AuthProvider";
 
-export function Header({ title, subtitle }: { title?: string; subtitle?: string }) {
+export function Header({
+  title,
+  subtitle,
+  user,
+  onSignOut,
+}: {
+  title?: string;
+  subtitle?: string;
+  user?: AuthUser;
+  onSignOut?: () => Promise<void>;
+}) {
   return (
     <header style={{
       height: "56px",
@@ -66,28 +77,36 @@ export function Header({ title, subtitle }: { title?: string; subtitle?: string 
       </button>
 
       {/* Avatar */}
-      <button
+      <div
         style={{
           display: "flex",
           alignItems: "center",
-          gap: "0.5rem",
+          gap: "0.65rem",
           padding: "0.25rem 0.375rem 0.25rem 0.5rem",
-          borderRadius: "8px",
-          background: "transparent",
-          border: "none",
-          cursor: "pointer",
-          transition: "background 150ms ease",
         }}
-        onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "var(--cv-card)"; }}
-        onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
       >
         <div style={{
           width: "24px", height: "24px",
           borderRadius: "50%",
           background: "linear-gradient(135deg, var(--cv-orange), var(--cv-purple))",
         }} />
-        <ChevronDown style={{ width: "12px", height: "12px", color: "var(--cv-muted)" }} />
-      </button>
+        {user && (
+          <>
+            <span title={user.email} style={{ color: "var(--cv-muted)", fontSize: "0.75rem", maxWidth: "140px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {user.display_name}
+            </span>
+            <button
+              type="button"
+              aria-label="Sign out"
+              title="Sign out"
+              onClick={() => onSignOut?.()}
+              style={{ padding: "0.4rem", border: 0, borderRadius: "6px", background: "transparent", color: "var(--cv-muted)", cursor: "pointer" }}
+            >
+              <LogOut style={{ width: "15px", height: "15px" }} />
+            </button>
+          </>
+        )}
+      </div>
     </header>
   );
 }

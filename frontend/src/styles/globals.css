@@ -327,6 +327,11 @@ h1, h2, h3, h4, h5, h6 {
   animation: pulseRing 1.8s ease-out infinite;
 }
 
+@keyframes auth-spin {
+  to { transform: rotate(360deg); }
+}
+.auth-spinner { animation: auth-spin 0.9s linear infinite; }
+
 /* ── Gradient text ── */
 .gradient-text {
   background: linear-gradient(135deg, #F97316 0%, #FB923C 50%, #FDBA74 100%);
