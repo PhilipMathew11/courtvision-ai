@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ArrowLeftRight, Search, ShieldAlert, Users, X } from "lucide-react";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 
-const API = "http://localhost:8000/api/v1";
+const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1";
 
 interface TradePlayer {
   nba_id: number;

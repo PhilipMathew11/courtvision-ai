@@ -27,7 +27,7 @@ export default function AnalyticsPage() {
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
 
-  const API = "http://localhost:8000/api/v1";
+  const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1";
 
   useEffect(() => {
     fetch(`${API}/teams/`)

@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 
-const API = "http://localhost:8000/api/v1";
+const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1";
 
 const examples = [
   "I need a strong defender with a bit of shooting, around 5'11",

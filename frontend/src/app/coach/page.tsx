@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import { Brain, Send, Sparkles, ChevronRight, User, RotateCcw, Copy, Check } from "lucide-react";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 
-const API = "http://localhost:8000/api/v1";
+const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1";
 
 const suggestedPrompts = [
   "Why did the Warriors beat the Lakers last season?",
